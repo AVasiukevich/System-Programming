@@ -13,13 +13,16 @@ namespace HomeWork_3
         {
             var S = new List<double>();
             var R = new List<double>();
+            var locker1 = new object();
+            var locker2 = new object();
 
 
             var A = new Thread(() =>
             {
-                var i = 0;
+                var i = 1;
                 while (true)
-                { S.Add(i++); }
+                    lock (locker1)
+                        S.Add(i++); 
             });
 
             A.Start();
@@ -27,11 +30,16 @@ namespace HomeWork_3
             var B = new Thread(() =>
             {
                 while (true)
-                    if (S.Count == 0)
+                    lock (locker1)
+                    {
                         Thread.Sleep(1000);
-                    else
-                        { R.Add(Math.Pow(S.Last(), 2)); }
-                });
+                        lock (locker2)
+                        {
+                            Thread.Sleep(1000);
+                            R.Add(Math.Pow(S.Last(), 2));
+                        }
+                    }
+            });
 
             B.Start();
 
@@ -41,7 +49,9 @@ namespace HomeWork_3
                     if (S.Count == 0)
                         Thread.Sleep(1000);
                     else
-                        { R.Add(S.Last() / 3); }
+                        lock (locker2)
+                            lock (locker1)
+                                R.Add(S.Last() / 3); 
                 });
 
             C.Start();
@@ -49,11 +59,15 @@ namespace HomeWork_3
             var D = new Thread(() =>
             {
                 while (true)
+                {
                     if (R.Count == 0)
-                        { Console.WriteLine("List R empty!"); Thread.Sleep(1000); }
+                    { Console.WriteLine("List R empty!"); Thread.Sleep(1000); }
                     else
-                        { Console.WriteLine(R.Last()); }
+                        lock (locker2)
+                            Console.WriteLine(R.Last());
+                }
                 });
+
             D.Start();
 
         }
