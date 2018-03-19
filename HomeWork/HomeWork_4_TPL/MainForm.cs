@@ -14,20 +14,27 @@ namespace HomeWork_4_TPL
 {
     public partial class mainForm : Form
     {
+        private CancellationTokenSource tokenSource;
+        private CancellationToken token;
         private string nameFolder;
+        private string fullPath;
         private Progress<int> progress;
         private List<string> _list_paths;
+        private List<Task> _listTasks;
 
         public mainForm()
         {
             InitializeComponent();
             _list_paths = new List<string>();
+            _listTasks = new List<Task>();
+            tokenSource = new CancellationTokenSource();
+            token = tokenSource.Token;
         }
 
         private void btn_whence_Click(object sender, EventArgs e)
         {
             _list_paths.Clear();
-            tb_whence.Text = string.Empty;
+            tb_whence.Text = nameFolder = String.Empty;
             var open_window = new OpenFileDialog();
             open_window.Filter = "All files (*.*)|*.*";
             open_window.Multiselect = true;
@@ -49,21 +56,22 @@ namespace HomeWork_4_TPL
         }
         private void btn_copy_Click(object sender, EventArgs e)
         {
+            fullPath = String.Empty;
             prg_main.Value = 0;
-            prg_main.Maximum = 0;
-            progress = new Progress<int>(i => { prg_main.Maximum += i; prg_main.Value += i; });
+            progress = new Progress<int>(i => { prg_main.Value++; });
 
-            if (nameFolder != null)
+            if (nameFolder != null && !String.IsNullOrEmpty(tb_where.Text))
             {
-                nameFolder = $"{tb_where.Text}\\{nameFolder}";
-                Directory.CreateDirectory(nameFolder);
+                fullPath = $"{tb_where.Text}\\{nameFolder}";
+                Directory.CreateDirectory(fullPath);
             }
             else
-                nameFolder = tb_where.Text;
+                fullPath = tb_where.Text;
 
+            prg_main.Maximum = (int)_list_paths.Sum(i => Math.Ceiling((double) new FileInfo(i).Length / 4096));
             foreach (var item in _list_paths)
             {
-                Task.Run(() => Copy(progress, item));
+               _listTasks.Add(Task.Run(() => Copy(progress, item)));
             }
         }
         private void Copy(IProgress<int> progress, string path)
@@ -71,9 +79,8 @@ namespace HomeWork_4_TPL
             if (!String.IsNullOrEmpty(tb_where.Text) && !String.IsNullOrEmpty(tb_whence.Text))
             {
                 var streamRead = new FileStream(path, FileMode.Open);
-                var streamWrite = new FileStream($"{nameFolder}\\{Path.GetFileName(path)}", FileMode.Create);
+                var streamWrite = new FileStream($"{fullPath}\\{Path.GetFileName(path)}", FileMode.Create);
                 byte[] buffer = new byte[4096];
-                var max = (int)Math.Ceiling((double)streamRead.Length / 4096);
                 while (true)
                 {
                     if (streamWrite.Length == streamRead.Length)
@@ -81,6 +88,8 @@ namespace HomeWork_4_TPL
                     var ReadLength = streamRead.Read(buffer, 0, buffer.Length);
                     streamWrite.Write(buffer, 0, ReadLength);
                     progress.Report(1);
+                    if (token.IsCancellationRequested)
+                        break;
                 }
                 streamRead.Close(); streamRead.Dispose();
                 streamWrite.Close(); streamWrite.Dispose();
@@ -89,12 +98,29 @@ namespace HomeWork_4_TPL
 
         private void btn_whence_folder_Click(object sender, EventArgs e)
         {
+            nameFolder = String.Empty;
             var open_window = new FolderBrowserDialog();
             if (open_window.ShowDialog() == DialogResult.OK)
             {
                 tb_whence.Text = open_window.SelectedPath;
                 nameFolder = Path.GetFileName(open_window.SelectedPath);
                 _list_paths.AddRange(Directory.GetFiles(open_window.SelectedPath));
+            }
+        }
+
+        private void btn_cancel_Click(object sender, EventArgs e)
+        {
+            tokenSource.Cancel();
+            foreach (var item in _listTasks)
+            {
+                item.Wait();
+            }
+            if (nameFolder != String.Empty)
+                Directory.Delete(fullPath, true);
+            else
+            {
+                foreach (var item in _list_paths)
+                    File.Delete($"{fullPath}\\{Path.GetFileName(item)}");
             }
         }
     }

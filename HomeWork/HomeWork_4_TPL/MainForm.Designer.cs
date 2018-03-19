@@ -37,6 +37,7 @@
             this.prg_main = new System.Windows.Forms.ProgressBar();
             this.btn_copy = new System.Windows.Forms.Button();
             this.btn_whence_folder = new System.Windows.Forms.Button();
+            this.btn_cancel = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -77,6 +78,7 @@
             this.btn_whence.Name = "btn_whence";
             this.btn_whence.Size = new System.Drawing.Size(75, 23);
             this.btn_whence.TabIndex = 4;
+            this.btn_whence.TabStop = false;
             this.btn_whence.Text = "Файл...";
             this.btn_whence.UseVisualStyleBackColor = true;
             this.btn_whence.Click += new System.EventHandler(this.btn_whence_Click);
@@ -87,6 +89,7 @@
             this.btn_where.Name = "btn_where";
             this.btn_where.Size = new System.Drawing.Size(153, 23);
             this.btn_where.TabIndex = 5;
+            this.btn_where.TabStop = false;
             this.btn_where.Text = "Файл...";
             this.btn_where.UseVisualStyleBackColor = true;
             this.btn_where.Click += new System.EventHandler(this.btn_where_Click);
@@ -103,7 +106,7 @@
             // 
             this.btn_copy.Location = new System.Drawing.Point(428, 124);
             this.btn_copy.Name = "btn_copy";
-            this.btn_copy.Size = new System.Drawing.Size(153, 23);
+            this.btn_copy.Size = new System.Drawing.Size(75, 23);
             this.btn_copy.TabIndex = 7;
             this.btn_copy.Text = "Копировать";
             this.btn_copy.UseVisualStyleBackColor = true;
@@ -115,15 +118,29 @@
             this.btn_whence_folder.Name = "btn_whence_folder";
             this.btn_whence_folder.Size = new System.Drawing.Size(75, 23);
             this.btn_whence_folder.TabIndex = 8;
+            this.btn_whence_folder.TabStop = false;
             this.btn_whence_folder.Text = "Папка...";
             this.btn_whence_folder.UseVisualStyleBackColor = true;
             this.btn_whence_folder.Click += new System.EventHandler(this.btn_whence_folder_Click);
             // 
+            // btn_cancel
+            // 
+            this.btn_cancel.Location = new System.Drawing.Point(509, 124);
+            this.btn_cancel.Name = "btn_cancel";
+            this.btn_cancel.Size = new System.Drawing.Size(75, 23);
+            this.btn_cancel.TabIndex = 9;
+            this.btn_cancel.TabStop = false;
+            this.btn_cancel.Text = "Отмена";
+            this.btn_cancel.UseVisualStyleBackColor = true;
+            this.btn_cancel.Click += new System.EventHandler(this.btn_cancel_Click);
+            // 
             // mainForm
             // 
+            this.AcceptButton = this.btn_copy;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(593, 175);
+            this.Controls.Add(this.btn_cancel);
             this.Controls.Add(this.btn_whence_folder);
             this.Controls.Add(this.btn_copy);
             this.Controls.Add(this.prg_main);
@@ -151,6 +168,7 @@
         private System.Windows.Forms.ProgressBar prg_main;
         private System.Windows.Forms.Button btn_copy;
         private System.Windows.Forms.Button btn_whence_folder;
+        private System.Windows.Forms.Button btn_cancel;
     }
 }
 
